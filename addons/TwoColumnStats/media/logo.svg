@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Two Column Stats logo: two gold columns. Not shipped in the addon zip. -->
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="40%" r="75%">
+      <stop offset="0" stop-color="#3a2d1f"/>
+      <stop offset="1" stop-color="#140f0a"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#a8761f"/>
+      <stop offset="0.35" stop-color="#f6dc93"/>
+      <stop offset="0.6" stop-color="#e2b75a"/>
+      <stop offset="1" stop-color="#8a5c16"/>
+    </linearGradient>
+    <linearGradient id="goldFlat" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f6dc93"/>
+      <stop offset="1" stop-color="#c08f35"/>
+    </linearGradient>
+    <g id="column">
+      <!-- abacus -->
+      <rect x="-56" y="0" width="112" height="16" rx="2" fill="url(#goldFlat)"/>
+      <!-- echinus -->
+      <path d="M-50 16 H50 L38 34 H-38 Z" fill="url(#gold)"/>
+      <!-- necking -->
+      <rect x="-38" y="34" width="76" height="8" fill="#8a5c16"/>
+      <!-- shaft -->
+      <rect x="-36" y="42" width="72" height="242" fill="url(#gold)"/>
+      <!-- flutes -->
+      <g fill="#7a5114" opacity="0.75">
+        <rect x="-26" y="50" width="5" height="226" rx="2.5"/>
+        <rect x="-10" y="50" width="5" height="226" rx="2.5"/>
+        <rect x="5" y="50" width="5" height="226" rx="2.5"/>
+        <rect x="21" y="50" width="5" height="226" rx="2.5"/>
+      </g>
+      <!-- torus and plinth -->
+      <rect x="-46" y="284" width="92" height="14" rx="7" fill="url(#gold)"/>
+      <rect x="-56" y="298" width="112" height="16" rx="2" fill="url(#goldFlat)"/>
+    </g>
+  </defs>
+
+  <rect width="512" height="512" fill="url(#bg)"/>
+
+  <!-- Each column is 112 x 314 units, stretched to fill half the image (256 x 512) -->
+  <use href="#column" transform="translate(128 0) scale(2.2857 1.6306)"/>
+  <use href="#column" transform="translate(384 0) scale(2.2857 1.6306)"/>
+</svg>
