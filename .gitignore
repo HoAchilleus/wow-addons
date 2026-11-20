@@ -1,0 +1,13 @@
+# Release builds
+dist/
+
+# Python
+__pycache__/
+.pytest_cache/
+
+# Editors and OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db

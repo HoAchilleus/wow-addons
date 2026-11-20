@@ -1,0 +1,54 @@
+name: Release
+
+# One addon at a time: push a tag named <Addon>/v<version>,
+# e.g. git tag TwoColumnStats/v1.0.0 && git push origin TwoColumnStats/v1.0.0
+on:
+  push:
+    tags: ["*/v*"]
+
+permissions:
+  contents: write   # to create the GitHub release
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+      CURSEFORGE_GAME_VERSIONS: ${{ vars.CURSEFORGE_GAME_VERSIONS }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read the addon and version from the tag
+        id: meta
+        run: |
+          read -r addon version <<< "$(python3 tools/release.py tag "$GITHUB_REF_NAME")"
+          echo "addon=$addon" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if grep -q '^## X-Curse-Project-ID:' "addons/$addon/$addon.toc"; then
+            echo "curseforge=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Lint and test
+        run: |
+          docker build --tag wow-addons-check tools/docker
+          docker run --rm --volume "$PWD:/repo" wow-addons-check sh scripts/check.sh
+
+      - name: Package
+        id: package
+        run: echo "zip=$(python3 tools/release.py package '${{ steps.meta.outputs.addon }}')" >> "$GITHUB_OUTPUT"
+
+      - name: Create the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ADDON: ${{ steps.meta.outputs.addon }}
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: |
+          python3 tools/release.py notes "$ADDON" "$VERSION" > notes.md
+          prerelease=""
+          case "$VERSION" in *-*) prerelease="--prerelease" ;; esac
+          gh release create "$GITHUB_REF_NAME" '${{ steps.package.outputs.zip }}' \
+            --title "$ADDON $VERSION" --notes-file notes.md $prerelease
+
+      - name: Upload to CurseForge
+        if: steps.meta.outputs.curseforge == 'true' && env.CF_API_TOKEN != ''
+        run: python3 tools/release.py curseforge-upload '${{ steps.meta.outputs.addon }}' '${{ steps.package.outputs.zip }}'

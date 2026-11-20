@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Lint and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Same image as scripts/check.ps1 uses locally, so results match.
+      - name: Build the check image
+        run: docker build --tag wow-addons-check tools/docker
+
+      - name: Lint and test every addon
+        run: docker run --rm --volume "$PWD:/repo" wow-addons-check sh scripts/check.sh

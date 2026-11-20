@@ -1,0 +1,14 @@
+## Interface: 16001
+## Title: Two Column Stats
+## Notes: Shows the character sheet stats in two columns, so nothing needs scrolling.
+## Author: Jake Baum
+## Version: 1.0.0
+## X-License: MIT
+## SavedVariables: TwoColumnStatsDB
+
+Config.lua
+Layout.lua
+Stats.lua
+Background.lua
+Panel.lua
+Core.lua

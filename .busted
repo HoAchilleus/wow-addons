@@ -1,0 +1,13 @@
+-- busted configuration: runs every addon's spec/ folder.
+-- Run from the repo root (scripts/check.ps1 or scripts/check.sh do this).
+return {
+	_all = {
+		lpath = "spec/helpers/?.lua",
+	},
+	default = {
+		ROOT = { "addons" },
+		pattern = "_spec",
+		recursive = true,
+		["output"] = "utfTerminal",
+	},
+}
