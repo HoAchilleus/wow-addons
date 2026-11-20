@@ -1,5 +1,13 @@
 # Release builds
 dist/
+*.zip
+
+# Local secrets (e.g. a CurseForge token for tools/release.py)
+.env
+.env.*
+
+# Logs
+*.log
 
 # Python
 __pycache__/
