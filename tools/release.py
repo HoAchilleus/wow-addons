@@ -305,7 +305,11 @@ def main(argv: list[str] | None = None) -> int:
         elif args.command == "curseforge-upload":
             print(curseforge_upload(args.addon, args.zip))
         elif args.command == "curseforge-versions":
-            for v in curseforge_versions(args.filter):
+            versions = curseforge_versions(args.filter)
+            if not versions:
+                raise ReleaseError(f"no game versions match {args.filter!r}; names are numbers like 1.60.1, "
+                                   "so try part of one, or no filter to list them all")
+            for v in versions:
                 print(f"{v.get('id')}\t{v.get('name')}")
     except ReleaseError as err:
         print(f"error: {err}", file=sys.stderr)

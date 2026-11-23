@@ -89,10 +89,13 @@ Uploading is optional, per addon, and turns on once all of these are set up:
    project ID to the `.toc`: `## X-Curse-Project-ID: 123456`.
 2. Create an API token at <https://legacy.curseforge.com/account/api-tokens>
    and add it to the GitHub repo as the secret `CF_API_TOKEN`.
-3. Find the game version ID(s) to list the file under:
+3. Find the game version ID(s) to list the file under. The IDs come from
+   CurseForge's API, which names versions by number, so filter
+   by the game's version (WoW: Forever is `1.60.1`, ID 17053):
 
    ```powershell
-   $env:CF_API_TOKEN = '<token>'; python tools/release.py curseforge-versions forever
+   $env:CF_API_TOKEN = Read-Host "CurseForge API token"
+   python tools/release.py curseforge-versions 1.60
    ```
 
    and add them, comma-separated, as the repo variable

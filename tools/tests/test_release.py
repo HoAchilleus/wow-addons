@@ -163,6 +163,20 @@ def test_curseforge_http_error_becomes_release_error(monkeypatch):
     assert "abc-123" not in str(info.value)
 
 
+def test_curseforge_versions_command(monkeypatch, capsys):
+    versions = [{"id": 17053, "name": "1.60.1"}, {"id": 12345, "name": "11.2.0"}]
+    monkeypatch.setattr(release, "curseforge_versions",
+                        lambda needle="": [v for v in versions if needle in v["name"]])
+
+    assert release.main(["curseforge-versions", "1.60"]) == 0
+    assert capsys.readouterr().out == "17053\t1.60.1\n"
+
+    assert release.main(["curseforge-versions", "forever"]) == 1
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "no game versions match 'forever'" in captured.err
+
+
 def test_upload_needs_token(repo, tmp_path, monkeypatch):
     monkeypatch.delenv("CF_API_TOKEN", raising=False)
     zip_path = release.package("Demo", tmp_path / "dist", repo / "addons", repo)
