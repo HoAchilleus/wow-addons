@@ -13,7 +13,7 @@ jobs:
     name: Lint and test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # Same image as scripts/check.ps1 uses locally, so results match.
       - name: Build the check image
