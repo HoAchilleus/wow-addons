@@ -6,6 +6,12 @@ All notable changes to Two Column Stats. The format follows
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-11-23
+
+### Changed
+
+- First release on CurseForge. The addon itself is unchanged from 1.0.0.
+
 ## [1.0.0] - 2026-11-20
 
 ### Added

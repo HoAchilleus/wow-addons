@@ -2,7 +2,7 @@
 ## Title: Two Column Stats
 ## Notes: Shows the character sheet stats in two columns, so nothing needs scrolling.
 ## Author: Jake Baum
-## Version: 1.0.0
+## Version: 1.0.1
 ## X-License: MIT
 ## SavedVariables: TwoColumnStatsDB
 ## X-Curse-Project-ID: 1818845
