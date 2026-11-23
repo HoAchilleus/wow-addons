@@ -141,6 +141,28 @@ def test_build_upload_request(repo, tmp_path):
     assert zip_path.read_bytes() in body
 
 
+@pytest.mark.parametrize("raw", ["abc-123", "  abc-123\n", '"abc-123"', "'abc-123'"])
+def test_curseforge_token_is_cleaned(monkeypatch, raw):
+    monkeypatch.setenv("CF_API_TOKEN", raw)
+    assert release.curseforge_token() == "abc-123"
+
+
+def test_curseforge_http_error_becomes_release_error(monkeypatch):
+    import io
+    import urllib.error
+
+    def fail(request, timeout):
+        body = b'{"errorMessage":"API token is malformed. Token provided: abc-123."}'
+        raise urllib.error.HTTPError(request.full_url, 400, "Bad Request", {}, io.BytesIO(body))
+
+    monkeypatch.setenv("CF_API_TOKEN", "abc-123")
+    monkeypatch.setattr(release.urllib.request, "urlopen", fail)
+    with pytest.raises(release.ReleaseError, match="HTTP 400 Bad Request - check CF_API_TOKEN") as info:
+        release.curseforge_versions()
+    assert str(info.value).endswith("Token provided: ***.\"}")
+    assert "abc-123" not in str(info.value)
+
+
 def test_upload_needs_token(repo, tmp_path, monkeypatch):
     monkeypatch.delenv("CF_API_TOKEN", raising=False)
     zip_path = release.package("Demo", tmp_path / "dist", repo / "addons", repo)

@@ -29,6 +29,7 @@ import os
 import re
 import sys
 import uuid
+import urllib.error
 import urllib.request
 import zipfile
 from dataclasses import dataclass, field
@@ -213,29 +214,53 @@ def build_upload_request(project_id: str, token: str, zip_path: Path, version: s
     )
 
 
+def curseforge_token() -> str:
+    # Pasted tokens often pick up quotes or spaces, which CurseForge rejects.
+    token = os.environ.get("CF_API_TOKEN", "").strip().strip("'\"")
+    if not token:
+        raise ReleaseError("CF_API_TOKEN is not set")
+    return token
+
+
+def curseforge_request(request: urllib.request.Request, timeout: int) -> bytes:
+    """Sends a CurseForge API request, turning HTTP errors into a ReleaseError
+    that says what probably went wrong."""
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
+            return response.read()
+    except urllib.error.HTTPError as err:
+        body = err.read().decode(errors="replace").strip()
+        # CurseForge echoes a rejected token back; keep it out of logs.
+        token = request.get_header("X-api-token")
+        if token:
+            body = body.replace(token, "***")
+        body = body[:500]
+        hint = ""
+        if err.code in (400, 401, 403):
+            hint = (" - check CF_API_TOKEN is an upload API token from"
+                    " https://legacy.curseforge.com/account/api-tokens (not a CurseForge"
+                    " Core API key from console.curseforge.com)")
+        raise ReleaseError(f"CurseForge said HTTP {err.code} {err.reason}{hint}"
+                           + (f"\n{body}" if body else "")) from err
+
+
 def curseforge_upload(name: str, zip_path: Path, root: Path = ADDONS) -> str:
     toc = read_toc(name, root)
     project_id = toc.fields.get("X-Curse-Project-ID")
     if not project_id:
         raise ReleaseError(f"{toc.path.name} has no ## X-Curse-Project-ID")
-    token = os.environ.get("CF_API_TOKEN")
-    if not token:
-        raise ReleaseError("CF_API_TOKEN is not set")
+    token = curseforge_token()
     game_versions = parse_game_versions(os.environ.get("CURSEFORGE_GAME_VERSIONS"))
     changelog = changelog_section((toc.path.parent / "CHANGELOG.md").read_text(encoding="utf-8"),
                                   toc.version or "") or ""
     request = build_upload_request(project_id, token, zip_path, toc.version or "", changelog, game_versions)
-    with urllib.request.urlopen(request, timeout=120) as response:
-        return response.read().decode()
+    return curseforge_request(request, timeout=120).decode()
 
 
 def curseforge_versions(name_filter: str = "") -> list[dict]:
-    token = os.environ.get("CF_API_TOKEN")
-    if not token:
-        raise ReleaseError("CF_API_TOKEN is not set")
-    request = urllib.request.Request(f"{CURSEFORGE_API}/game/versions", headers={"X-Api-Token": token})
-    with urllib.request.urlopen(request, timeout=60) as response:
-        versions = json.load(response)
+    request = urllib.request.Request(f"{CURSEFORGE_API}/game/versions",
+                                     headers={"X-Api-Token": curseforge_token()})
+    versions = json.loads(curseforge_request(request, timeout=60))
     needle = name_filter.lower()
     return [v for v in versions if needle in str(v.get("name", "")).lower()]
 
