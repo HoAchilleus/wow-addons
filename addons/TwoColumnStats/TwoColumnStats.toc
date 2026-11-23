@@ -5,6 +5,7 @@
 ## Version: 1.0.0
 ## X-License: MIT
 ## SavedVariables: TwoColumnStatsDB
+## X-Curse-Project-ID: 1818845
 
 Config.lua
 Layout.lua
